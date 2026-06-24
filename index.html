@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commerce Multi-Tool Consolidator — Bukkar</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#ffffff;
+  --bg:#f7f7f5;
+  --bg2:#f0f0ed;
+  --border:#e2e2de;
+  --border2:#d0d0cc;
+  --rd:#c02000;--rd2:#e03010;--rd-light:#fff0ee;
+  --gd:#c09000;--gd2:#d9b31f;--gd-light:#fffbee;
+  --gn:#2d6b12;--gn2:#408020;--gn-light:#f0f7ed;
+  --text:#1a1a18;--text2:#4a4a46;--text3:#8a8a84;
+  --mono:'DM Mono',monospace;--sans:'Barlow',sans-serif;
+}
+html{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+body{background:var(--bg)}
+
+/* NAVBAR — only dark element */
+.hdr{background:#000;padding:0 24px;position:sticky;top:0;z-index:100;border-bottom:2px solid var(--rd)}
+.hi{max-width:980px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;gap:16px}
+.lw{display:flex;align-items:center;gap:12px;text-decoration:none}
+.lw img{height:30px;width:auto}
+.tn{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.6);border-left:1px solid rgba(255,255,255,.2);padding-left:12px}
+.hcta{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gd2);text-decoration:none;border:1px solid rgba(217,179,31,.5);padding:5px 13px;border-radius:2px;transition:all .2s;white-space:nowrap}
+.hcta:hover{background:rgba(217,179,31,.15)}
+
+.pg{max-width:980px;margin:0 auto;padding:48px 24px 80px}
+
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--rd);display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.eyebrow::before{content:'';width:18px;height:2px;background:var(--rd)}
+h1{font-family:var(--sans);font-weight:900;font-size:clamp(36px,7vw,62px);line-height:.95;letter-spacing:-.03em;color:var(--text);margin-bottom:14px}
+h1 .accent-rd{color:var(--rd)}
+h1 .accent-gd{color:var(--gd)}
+.hero-sub{font-family:var(--mono);font-size:12px;color:var(--text2);line-height:1.72;max-width:640px;margin-bottom:36px}
+
+/* LIVE COST METER */
+.cost-meter{background:var(--white);border:1px solid var(--border);border-radius:4px;padding:22px 26px;margin-bottom:28px;display:flex;align-items:center;gap:32px;flex-wrap:wrap}
+.cm-left{flex:1;min-width:180px}
+.cm-label{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:6px}
+.cm-val{font-family:var(--sans);font-weight:900;font-size:40px;color:var(--rd);letter-spacing:-.02em;line-height:1}
+.cm-sub{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px}
+.cm-right{display:flex;gap:28px}
+.cm-col{text-align:center}
+.cm-col-v{font-family:var(--sans);font-weight:900;font-size:26px;letter-spacing:-.02em;line-height:1}
+.cm-col-v.save{color:var(--gn2)}
+.cm-col-v.tools{color:var(--text2)}
+.cm-col-l{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-top:4px}
+
+/* SELECTOR */
+.sel-label{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:12px}
+.tool-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:24px}
+.tool-chip{background:var(--white);border:1px solid var(--border);border-radius:3px;padding:13px 14px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:11px}
+.tool-chip:hover{border-color:var(--rd2);background:var(--rd-light)}
+.tool-chip.on{background:var(--rd-light);border-color:var(--rd)}
+.tc-ico{font-size:18px;flex-shrink:0;line-height:1}
+.tc-name{font-family:var(--sans);font-weight:600;font-size:13px;color:var(--text);line-height:1.2}
+.tool-chip.on .tc-name{color:var(--rd)}
+.tc-cost{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.tc-chk{margin-left:auto;width:17px;height:17px;border:1.5px solid var(--border2);border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;background:var(--white)}
+.tool-chip.on .tc-chk{background:var(--rd);border-color:var(--rd);color:#fff}
+
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:6px}
+.fl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);display:block;margin-bottom:7px;margin-top:16px}
+.fl:first-of-type{margin-top:0}
+select{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:3px;color:var(--text);font-family:var(--mono);font-size:12px;padding:10px 12px;outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238a8a84' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+select:focus{border-color:var(--rd);background:var(--white)}
+
+.gen-btn{width:100%;background:var(--rd);color:#fff;font-family:var(--sans);font-weight:700;font-size:15px;letter-spacing:.05em;text-transform:uppercase;padding:15px 28px;border:none;border-radius:3px;cursor:pointer;transition:all .2s;margin-top:20px;display:flex;align-items:center;justify-content:center;gap:10px}
+.gen-btn:hover{background:var(--rd2);transform:translateY(-1px)}
+.gen-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* PROFILE PANEL */
+.profile-panel{display:none;background:var(--white);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-top:24px;animation:up .4s ease}
+.profile-panel.show{display:block}
+@keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* RESULT HEADER BAR — small dark accent element permitted */
+.profile-hdr{background:var(--rd);padding:22px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.ph-label{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.75);margin-bottom:6px;display:block}
+.ph-title{font-family:var(--sans);font-weight:700;font-size:18px;color:#fff;line-height:1.2}
+.ph-right{display:flex;gap:24px;flex-shrink:0}
+.ph-metric-v{font-family:var(--sans);font-weight:900;font-size:26px;color:#fff;letter-spacing:-.02em;line-height:1}
+.ph-metric-l{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.65);letter-spacing:.08em;text-transform:uppercase;margin-top:3px}
+
+.mapping-body{padding:24px 28px}
+.map-label{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--text3);margin-bottom:14px;display:block}
+
+.map-table{width:100%;border-collapse:collapse;margin-bottom:24px;background:var(--white)}
+.map-table th{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);text-align:left;padding:8px 12px;border-bottom:2px solid var(--border);font-weight:400;background:var(--bg)}
+.map-table td{padding:12px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.map-table tr:last-child td{border-bottom:none}
+.tool-name-cell{font-family:var(--sans);font-weight:600;font-size:13px;color:var(--text)}
+.tool-cost-cell{font-family:var(--mono);font-size:11px;color:var(--rd)}
+.arrow-cell{font-size:16px;color:var(--text3);text-align:center}
+.bukkar-feat{font-family:var(--mono);font-size:10px;color:var(--gn);background:var(--gn-light);border:1px solid var(--gn2);padding:4px 10px;border-radius:2px;display:inline-block;white-space:nowrap}
+.free-cell{font-family:var(--mono);font-size:11px;color:var(--gn)}
+
+.mig-label{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;display:block}
+.mig-steps{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.mig-step{display:flex;align-items:flex-start;gap:12px;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:13px 15px}
+.mig-n{width:22px;height:22px;border-radius:50%;background:var(--rd);color:#fff;font-family:var(--mono);font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mig-txt{font-family:var(--mono);font-size:11px;color:var(--text2);line-height:1.6}
+.mig-txt strong{color:var(--text);font-weight:500}
+
+.activate-btn{display:block;width:100%;background:var(--rd);color:#fff;font-family:var(--sans);font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;padding:15px 28px;border-radius:3px;text-align:center;transition:all .2s;margin-bottom:14px}
+.activate-btn:hover{background:var(--rd2)}
+
+.profile-note{font-family:var(--mono);font-size:10px;color:var(--text2);line-height:1.65;text-align:center;background:var(--gd-light);border:1px solid var(--gd2);border-radius:3px;padding:12px 16px}
+.profile-note strong{color:var(--gd);font-weight:500}
+
+.reset-lnk{display:block;margin:16px auto 0;background:transparent;border:none;color:var(--text3);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;text-decoration:underline}
+.reset-lnk:hover{color:var(--rd)}
+
+.cta-bar{background:var(--white);border:1px solid var(--border);border-radius:4px;padding:28px;margin-top:28px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.cta-t{flex:1;min-width:200px}
+.cta-h{font-family:var(--sans);font-weight:700;font-size:17px;color:var(--text);margin-bottom:6px;line-height:1.2}
+.cta-h span{color:var(--gd)}
+.cta-d{font-family:var(--mono);font-size:11px;color:var(--text2);line-height:1.6}
+.cta-btn{display:inline-block;background:var(--rd);color:#fff;font-family:var(--sans);font-weight:700;font-size:13px;letter-spacing:.03em;text-transform:uppercase;text-decoration:none;padding:13px 26px;border-radius:3px;white-space:nowrap;flex-shrink:0;transition:all .2s}
+.cta-btn:hover{background:var(--rd2)}
+
+footer{border-top:1px solid var(--border);padding:20px 24px;margin-top:8px;background:var(--white)}
+.fi{max-width:980px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.fli{height:28px;width:auto;opacity:.8}
+.fn{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.06em;line-height:1.6}
+
+@media(max-width:680px){
+  .tool-grid{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+  .cost-meter{flex-direction:column;gap:16px}
+  .ph-right{gap:16px}
+  h1{font-size:38px}
+  .cta-bar{flex-direction:column}
+  .mapping-body{padding:18px}
+  .map-table{font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hi">
+    <a href="https://bukkar.com" class="lw">
+      <img src="data:image/jpeg;base64,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" alt="Bukkar">
+      <span class="tn">Commerce Multi-Tool Consolidator</span>
+    </a>
+    <a href="https://bukkar.com/join-the-waiting-list/" class="hcta">Join Free →</a>
+  </div>
+</header>
+
+<div class="pg">
+  <div class="eyebrow">Free Tool · Bukkar Ltd · Commerce Automation</div>
+  <h1>Replace Your <span class="accent-rd">6 Tools</span><br>With <span class="accent-gd">One Console.</span></h1>
+  <p class="hero-sub">Select every SaaS tool you currently pay for. Get a live Bukkar Commerce configuration showing exactly which Bukkar feature replaces each one, in which order to migrate, and your exact monthly saving — ready to activate.</p>
+
+  <div class="cost-meter">
+    <div class="cm-left">
+      <span class="cm-label">Your estimated monthly SaaS cost</span>
+      <div class="cm-val" id="cm-total">£0</div>
+      <div class="cm-sub">Select tools below to calculate</div>
+    </div>
+    <div class="cm-right">
+      <div class="cm-col">
+        <div class="cm-col-v tools" id="cm-tools">0</div>
+        <div class="cm-col-l">Tools selected</div>
+      </div>
+      <div class="cm-col">
+        <div class="cm-col-v save" id="cm-save">£0</div>
+        <div class="cm-col-l">Monthly saving</div>
+      </div>
+    </div>
+  </div>
+
+  <span class="sel-label">Select every tool you currently use or pay for</span>
+  <div class="tool-grid" id="tool-grid">
+    <div class="tool-chip" data-name="Stripe / Payment Gateway" data-cost="35" data-bukkar="Bukkar Commerce Payments" data-mig="1" onclick="toggleTool(this)">
+      <div class="tc-ico">💳</div>
+      <div><div class="tc-name">Stripe / Payment Gateway</div><div class="tc-cost">~£29–£45/mo + 1.5–3.5% per txn</div></div>
+      <div class="tc-chk"></div>
+    </div>
+    <div class="tool-chip" data-name="FreshBooks / Wave / Invoicing" data-cost="25" data-bukkar="Bukkar Invoicing & Billing" data-mig="2" onclick="toggleTool(this)">
+      <div class="tc-ico">🧾</div>
+      <div><div class="tc-name">FreshBooks / Wave / Invoicing</div><div class="tc-cost">~£15–£40/mo</div></div>
+      <div class="tc-chk"></div>
+    </div>
+    <div class="tool-chip" data-name="HubSpot / Pipedrive / CRM" data-cost="55" data-bukkar="Bukkar Customer Management" data-mig="3" onclick="toggleTool(this)">
+      <div class="tc-ico">👥</div>
+      <div><div class="tc-name">HubSpot / Pipedrive / CRM</div><div class="tc-cost">~£40–£80/mo starter</div></div>
+      <div class="tc-chk"></div>
+    </div>
+    <div class="tool-chip" data-name="Square / iZettle / POS Terminal" data-cost="30" data-bukkar="Bukkar Mobile POS & QR Commerce" data-mig="1" onclick="toggleTool(this)">
+      <div class="tc-ico">📱</div>
+      <div><div class="tc-name">Square / iZettle / POS Terminal</div><div class="tc-cost">~£19–£45/mo + hardware</div></div>
+      <div class="tc-chk"></div>
+    </div>
+    <div class="tool-chip" data-name="Chargebee / Recurly / Subscriptions" data-cost="60" data-bukkar="Bukkar Subscription & Recurring Billing" data-mig="2" onclick="toggleTool(this)">
+      <div class="tc-ico">🔄</div>
+      <div><div class="tc-name">Chargebee / Recurly / Subscriptions</div><div class="tc-cost">~£49–£90/mo</div></div>
+      <div class="tc-chk"></div>
+    </div>
+    <div class="tool-chip" data-name="Intercom / Zendesk / Support" data-cost="45" data-bukkar="Bukkar Customer Care & Messaging" data-mig="4" onclick="toggleTool(this)">
+      <div class="tc-ico">💬</div>
+      <div><div class="tc-name">Intercom / Zendesk / Support</div><div class="tc-cost">~£39–£65/mo starter</div></div>
+      <div class="tc-chk"></div>
+    </div>
+    <div class="tool-chip" data-name="Wise / PayPal / International Transfers" data-cost="20" data-bukkar="Bukkar Borderless Payments & Multi-Currency Wallet" data-mig="1" onclick="toggleTool(this)">
+      <div class="tc-ico">🌍</div>
+      <div><div class="tc-name">Wise / PayPal / International Transfers</div><div class="tc-cost">2–5% per transaction</div></div>
+      <div class="tc-chk"></div>
+    </div>
+    <div class="tool-chip" data-name="Stuart / Gophr / Delivery Platform" data-cost="40" data-bukkar="Bukkar On-Demand Delivery Coordination" data-mig="4" onclick="toggleTool(this)">
+      <div class="tc-ico">🚚</div>
+      <div><div class="tc-name">Stuart / Gophr / Delivery Platform</div><div class="tc-cost">~£30–£55/mo + per delivery</div></div>
+      <div class="tc-chk"></div>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div>
+      <span class="fl">Business type</span>
+      <select id="biz-type">
+        <option value="">Select...</option>
+        <option>Retail / E-commerce</option>
+        <option>Hospitality / Food & Beverage</option>
+        <option>Professional Services / Agency</option>
+        <option>SaaS / Digital Products</option>
+        <option>On-Demand / Delivery</option>
+        <option>Creator / Content Business</option>
+        <option>Mixed / Other SME</option>
+      </select>
+    </div>
+    <div>
+      <span class="fl">Monthly transaction volume (approx)</span>
+      <select id="txn-vol">
+        <option value="">Select...</option>
+        <option value="low">Under £5,000/mo</option>
+        <option value="mid">£5,000–£25,000/mo</option>
+        <option value="high">£25,000–£100,000/mo</option>
+        <option value="enterprise">Over £100,000/mo</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="gen-btn" id="gen-btn" onclick="generateProfile()">
+    Configure My Bukkar Commerce Profile →
+  </button>
+
+  <div class="profile-panel" id="profile-panel">
+    <div class="profile-hdr">
+      <div>
+        <span class="ph-label">Your live Bukkar Commerce configuration</span>
+        <div class="ph-title" id="ph-title">Commerce Profile</div>
+      </div>
+      <div class="ph-right">
+        <div class="ph-metric">
+          <div class="ph-metric-v" id="ph-saving">—</div>
+          <div class="ph-metric-l">Saved / month</div>
+        </div>
+        <div class="ph-metric">
+          <div class="ph-metric-v" id="ph-tools">—</div>
+          <div class="ph-metric-l">Tools replaced</div>
+        </div>
+      </div>
+    </div>
+    <div class="mapping-body">
+      <span class="map-label">Feature mapping — your tools vs Bukkar Commerce</span>
+      <table class="map-table" id="map-table">
+        <thead><tr><th>Your current tool</th><th>Current cost</th><th></th><th>Bukkar Commerce feature</th><th>With Bukkar</th></tr></thead>
+        <tbody id="map-body"></tbody>
+      </table>
+      <span class="mig-label">Recommended migration sequence</span>
+      <div class="mig-steps" id="mig-steps"></div>
+      <a href="https://bukkar.com/join-the-waiting-list/" class="activate-btn">Activate This Profile — Join the Waitlist →</a>
+      <div class="profile-note"><strong>Pre-launch:</strong> Your configuration is saved to your Bukkar waitlist profile. When your account activates, Bukkar Commerce launches with this exact feature set already configured.</div>
+      <button class="reset-lnk" onclick="resetProfile()">← Reconfigure for a different tool stack</button>
+    </div>
+  </div>
+
+  <div class="cta-bar">
+    <div class="cta-t">
+      <div class="cta-h">One account. <span>Every commerce tool you need.</span></div>
+      <div class="cta-d">Payments, invoicing, CRM, subscriptions, delivery, customer care — all in Bukkar Commerce at 1.2% per transaction. No monthly SaaS fees. No separate logins. No data gaps between tools.</div>
+    </div>
+    <a href="https://bukkar.com/join-the-waiting-list/" class="cta-btn">Join Free →</a>
+  </div>
+</div>
+
+<footer>
+  <div class="fi">
+    <img src="data:image/jpeg;base64,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" alt="Bukkar" class="fli">
+    <span class="fn">Powered by VentureOS AI · Built by Sceamdo · ventureosai.com<br>Mohammad Bukkar | Economic Systems Architect and Founder — Sceamdo · VentureOS AI · Bukkar Ltd</span>
+  </div>
+</footer>
+
+<script>
+function toggleTool(el){
+  el.classList.toggle('on');
+  el.querySelector('.tc-chk').textContent = el.classList.contains('on') ? '✓' : '';
+  updateMeter();
+}
+function getSelectedTools(){
+  return [...document.querySelectorAll('.tool-chip.on')].map(el=>({
+    name:el.dataset.name, cost:parseInt(el.dataset.cost),
+    bukkar:el.dataset.bukkar, migStep:parseInt(el.dataset.mig)
+  }));
+}
+function updateMeter(){
+  const tools = getSelectedTools();
+  const total = tools.reduce((s,t)=>s+t.cost,0);
+  document.getElementById('cm-total').textContent = total ? `£${total}` : '£0';
+  document.getElementById('cm-tools').textContent = tools.length;
+  document.getElementById('cm-save').textContent  = total ? `£${total}` : '£0';
+}
+function generateProfile(){
+  const tools   = getSelectedTools();
+  const bizType = document.getElementById('biz-type').value;
+  if(!tools.length){ alert('Please select at least one tool you currently use.'); return; }
+  if(!bizType){ alert('Please select your business type.'); return; }
+  const totalSaving = tools.reduce((s,t)=>s+t.cost,0);
+  document.getElementById('ph-title').textContent = `${bizType} — ${tools.length} tool${tools.length!==1?'s':''} consolidated`;
+  document.getElementById('ph-saving').textContent = `£${totalSaving}`;
+  document.getElementById('ph-tools').textContent  = tools.length;
+  const tbody = document.getElementById('map-body');
+  tbody.innerHTML = '';
+  tools.forEach(t=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="tool-name-cell">${t.name}</td><td class="tool-cost-cell">£${t.cost}/mo</td><td class="arrow-cell">→</td><td><span class="bukkar-feat">${t.bukkar}</span></td><td class="free-cell">Included</td>`;
+    tbody.appendChild(tr);
+  });
+  const migLabels  = {1:'Activate first',2:'Week 2',3:'Week 3',4:'Final migration'};
+  const migMessages = {
+    1:'Highest-impact replacements — activate on day one. Your revenue flow immediately stops depending on third-party tools.',
+    2:'Once day-one payments are stable, migrate invoicing and subscription billing. Cash flow consolidates into one account.',
+    3:'Move your CRM and customer data into Bukkar Customer Management. One place to see every client, payment, and interaction.',
+    4:'Complete the consolidation — support, delivery, and any remaining operational tools. Your entire commerce stack runs from one console.'
+  };
+  const byStep = {};
+  tools.forEach(t=>{ if(!byStep[t.migStep]) byStep[t.migStep]=[]; byStep[t.migStep].push(t); });
+  const stepsEl = document.getElementById('mig-steps');
+  stepsEl.innerHTML = '';
+  Object.keys(byStep).sort((a,b)=>a-b).forEach((step,idx)=>{
+    const toolNames = byStep[step].map(t=>t.name.split(' / ')[0]).join(', ');
+    const div = document.createElement('div');
+    div.className = 'mig-step';
+    div.innerHTML = `<div class="mig-n">${idx+1}</div><div class="mig-txt"><strong>${migLabels[step]||'Step '+(idx+1)} — ${toolNames}</strong><br>${migMessages[step]||''}</div>`;
+    stepsEl.appendChild(div);
+  });
+  document.getElementById('profile-panel').classList.add('show');
+  document.getElementById('profile-panel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function resetProfile(){
+  document.querySelectorAll('.tool-chip').forEach(el=>{el.classList.remove('on');el.querySelector('.tc-chk').textContent='';});
+  document.getElementById('biz-type').value='';
+  document.getElementById('txn-vol').value='';
+  document.getElementById('profile-panel').classList.remove('show');
+  updateMeter();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
